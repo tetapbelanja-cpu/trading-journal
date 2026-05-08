@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#111111">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Trading Journal">
+<meta name="description" content="Daily Trading Journal XAUUSD - Professional">
+<title>Trading Journal XAUUSD</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:        #0E0E0E;
+  --surf:      #161616;
+  --surf2:     #1E1E1E;
+  --surf3:     #252525;
+  --gold:      #C9A84C;
+  --gold-lt:   #E8C96A;
+  --gold-dim:  rgba(201,168,76,0.18);
+  --gold-line: rgba(201,168,76,0.35);
+  --white:     #F0EDE6;
+  --muted:     #666666;
+  --muted2:    #999999;
+  --green:     #4CAF6F;
+  --green-bg:  rgba(76,175,111,0.12);
+  --red:       #E05555;
+  --red-bg:    rgba(224,85,85,0.12);
+  --amber:     #E8A020;
+  --radius:    14px;
+  --radius-sm: 8px;
+  --ff-display: 'Playfair Display', Georgia, serif;
+  --ff-body:    'DM Sans', sans-serif;
+  --ff-mono:    'DM Mono', monospace;
+  --safe-top:   env(safe-area-inset-top, 0px);
+  --safe-bot:   env(safe-area-inset-bottom, 0px);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: var(--ff-body);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── SPLASH ── */
+#splash {
+  position: fixed; inset: 0; z-index: 999;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px;
+  transition: opacity .5s ease, visibility .5s ease;
+}
+#splash.hide { opacity: 0; visibility: hidden; }
+.splash-logo {
+  font-family: var(--ff-display);
+  font-size: 28px;
+  color: var(--gold);
+  letter-spacing: 2px;
+}
+.splash-sub { font-size: 11px; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; }
+.splash-bar {
+  width: 120px; height: 2px;
+  background: var(--surf3);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.splash-fill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 2px;
+  animation: fillBar .8s ease forwards;
+}
+@keyframes fillBar { from{width:0} to{width:100%} }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 100;
+  background: var(--surf);
+  border-top: 1px solid rgba(201,168,76,0.15);
+  display: flex;
+  padding-bottom: var(--safe-bot);
+  padding-bottom: max(var(--safe-bot), 8px);
+}
+.nav-btn {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px;
+  padding: 10px 4px;
+  background: none; border: none;
+  color: var(--muted);
+  font-family: var(--ff-body);
+  font-size: 10px;
+  letter-spacing: .5px;
+  cursor: pointer;
+  transition: color .2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-btn.active { color: var(--gold); }
+.nav-btn svg { width: 20px; height: 20px; stroke-width: 1.5; }
+.nav-btn span { font-size: 9px; text-transform: uppercase; letter-spacing: .8px; }
+
+/* ── PAGES ── */
+.page {
+  display: none;
+  padding: 0 0 90px 0;
+  padding-top: calc(var(--safe-top) + 0px);
+  min-height: 100vh;
+  animation: fadeIn .3s ease;
+}
+.page.active { display: block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── PAGE HEADER ── */
+.page-header {
+  background: linear-gradient(180deg, var(--surf) 0%, var(--bg) 100%);
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--gold-line);
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.page-header h1 {
+  font-family: var(--ff-display);
+  font-size: 22px;
+  color: var(--gold);
+  letter-spacing: .5px;
+}
+.page-header p { font-size: 11px; color: var(--muted); margin-top: 2px; letter-spacing: 1px; text-transform: uppercase; }
+
+/* ── SECTIONS ── */
+.section {
+  margin: 16px 16px 0;
+  background: var(--surf);
+  border-radius: var(--radius);
+  border: 1px solid rgba(201,168,76,0.1);
+  overflow: hidden;
+}
+.section-head {
+  padding: 12px 16px;
+  background: var(--surf2);
+  border-bottom: 1px solid rgba(201,168,76,0.1);
+  display: flex; align-items: center; gap: 8px;
+}
+.section-head h2 {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.section-accent {
+  width: 3px; height: 14px;
+  background: var(--gold);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.section-body { padding: 16px; }
+
+/* ── FORM ELEMENTS ── */
+.field { margin-bottom: 14px; }
+.field:last-child { margin-bottom: 0; }
+.field label {
+  display: block;
+  font-size: 10px;
+  color: var(--muted2);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  background: var(--surf3);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  color: var(--white);
+  font-family: var(--ff-body);
+  font-size: 14px;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color .2s;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--gold-line);
+  background: var(--surf2);
+}
+.field textarea { resize: vertical; min-height: 72px; }
+.field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L2 4h8z' fill='%23C9A84C'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+.field select option { background: #1e1e1e; }
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+/* ── MOOD CHIPS ── */
+.mood-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip {
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: var(--surf3);
+  color: var(--muted2);
+  font-size: 12px;
+  font-family: var(--ff-body);
+  cursor: pointer;
+  transition: all .2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.chip.active { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+
+/* ── DESIRE STATEMENT ── */
+.desire-card {
+  background: linear-gradient(135deg, #1a1600 0%, #1a1a00 100%);
+  border: 1px solid var(--gold-line);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin: 16px 16px 0;
+  position: relative;
+  overflow: hidden;
+}
+.desire-card::before {
+  content: '"';
+  position: absolute;
+  top: -10px; left: 10px;
+  font-family: var(--ff-display);
+  font-size: 80px;
+  color: var(--gold);
+  opacity: .15;
+  line-height: 1;
+}
+.desire-text {
+  font-family: var(--ff-display);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--gold-lt);
+  line-height: 1.7;
+  position: relative;
+  z-index: 1;
+}
+.desire-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--gold-dim);
+}
+.check-box {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  border: 1.5px solid var(--gold-line);
+  background: var(--surf3);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all .2s;
+  flex-shrink: 0;
+}
+.check-box.checked { background: var(--gold); border-color: var(--gold); }
+.check-box svg { width: 12px; height: 12px; stroke: #111; stroke-width: 2.5; }
+.check-label { font-size: 12px; color: var(--muted2); }
+
+/* ── TRADE LOG ── */
+.trade-list { display: flex; flex-direction: column; gap: 10px; }
+.trade-card {
+  background: var(--surf2);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255,255,255,0.05);
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.trade-card-head {
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surf3);
+}
+.trade-num {
+  font-family: var(--ff-mono);
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--surf);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+.direction-badge {
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.dir-buy  { background: var(--green-bg); color: var(--green); }
+.dir-sell { background: var(--red-bg);   color: var(--red); }
+.dir-none { background: var(--surf);     color: var(--muted); }
+.trade-time { font-family: var(--ff-mono); font-size: 11px; color: var(--muted2); margin-left: auto; }
+.trade-card-body { padding: 12px 14px; }
+.trade-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.trade-field-mini label { font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 4px; }
+.trade-field-mini input, .trade-field-mini select {
+  width: 100%;
+  background: var(--surf);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--white);
+  font-family: var(--ff-mono);
+  font-size: 13px;
+  text-align: center;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.trade-field-mini input:focus, .trade-field-mini select:focus {
+  outline: none; border-color: var(--gold-line);
+}
+.trade-field-mini select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L2 4h8z' fill='%23C9A84C'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; padding-right: 24px; }
+.trade-field-mini select option { background: #1e1e1e; }
+.trade-notes input {
+  width: 100%;
+  background: var(--surf);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--white);
+  font-family: var(--ff-body);
+  font-size: 12px;
+}
+.trade-notes input:focus { outline: none; border-color: var(--gold-line); }
+.trade-notes label { font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 4px; }
+
+.wl-select { color: var(--muted2); }
+.wl-win  { color: var(--green) !important; background: var(--green-bg) !important; }
+.wl-loss { color: var(--red)   !important; background: var(--red-bg)   !important; }
+
+.add-trade-btn {
+  width: 100%;
+  padding: 13px;
+  background: var(--gold-dim);
+  border: 1.5px dashed var(--gold-line);
+  border-radius: var(--radius-sm);
+  color: var(--gold);
+  font-family: var(--ff-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background .2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.add-trade-btn:active { background: rgba(201,168,76,0.25); }
+
+.del-trade {
+  background: none; border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px;
+  margin-left: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+.del-trade svg { width: 14px; height: 14px; stroke-width: 2; }
+
+/* ── SUMMARY CARDS ── */
+.summary-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 16px;
+}
+.sum-card {
+  background: var(--surf2);
+  border-radius: var(--radius-sm);
+  padding: 14px 12px;
+  text-align: center;
+  border: 1px solid rgba(201,168,76,0.08);
+}
+.sum-val {
+  font-family: var(--ff-display);
+  font-size: 26px;
+  color: var(--gold);
+  line-height: 1;
+}
+.sum-val.green { color: var(--green); }
+.sum-val.red   { color: var(--red); }
+.sum-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+/* ── SLIDER ── */
+.slider-row {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 12px;
+}
+.slider-row:last-child { margin-bottom: 0; }
+.slider-label { font-size: 12px; color: var(--muted2); width: 100px; flex-shrink: 0; }
+.slider-wrap { flex: 1; }
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%; height: 4px;
+  background: var(--surf3);
+  border-radius: 2px;
+  outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--gold);
+  cursor: pointer;
+  box-shadow: 0 0 0 4px rgba(201,168,76,0.15);
+}
+.slider-val {
+  font-family: var(--ff-display);
+  font-size: 18px;
+  color: var(--gold);
+  width: 28px;
+  text-align: right;
+}
+
+/* ── AFFIRMATION ── */
+.affirmation {
+  background: linear-gradient(135deg, #1a1600 0%, #111100 100%);
+  border: 1px solid var(--gold-line);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 14px 16px;
+  margin: 16px 16px 0;
+}
+.affirmation p {
+  font-family: var(--ff-display);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--gold-lt);
+  line-height: 1.6;
+}
+.affirmation small { font-size: 10px; color: var(--muted); display: block; margin-top: 6px; letter-spacing: 1px; text-transform: uppercase; }
+
+/* ── SAVE BUTTON ── */
+.save-btn {
+  margin: 16px 16px 0;
+  width: calc(100% - 32px);
+  padding: 15px;
+  background: var(--gold);
+  color: #111;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--ff-body);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .2s, transform .1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.save-btn:active { background: var(--gold-lt); transform: scale(0.99); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 90px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--surf3);
+  border: 1px solid var(--gold-line);
+  color: var(--white);
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  opacity: 0;
+  transition: all .3s;
+  pointer-events: none;
+  z-index: 200;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── HISTORY PAGE ── */
+.history-item {
+  background: var(--surf);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255,255,255,0.05);
+  padding: 14px 16px;
+  margin: 0 16px 10px;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.history-item:active { opacity: .8; }
+.history-date { flex: 1; }
+.history-date .d { font-size: 14px; font-weight: 500; color: var(--white); }
+.history-date .m { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.history-stats { text-align: right; }
+.history-stats .pl { font-family: var(--ff-mono); font-size: 14px; font-weight: 500; }
+.history-stats .pl.pos { color: var(--green); }
+.history-stats .pl.neg { color: var(--red); }
+.history-stats .wr { font-size: 11px; color: var(--muted); }
+.history-del {
+  background: none; border: none;
+  color: var(--muted);
+  padding: 8px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.history-del svg { width: 16px; height: 16px; stroke-width: 2; }
+
+.empty-state {
+  text-align: center;
+  padding: 60px 30px;
+  color: var(--muted);
+}
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state p { font-size: 13px; line-height: 1.6; }
+
+/* ── GOAL PAGE ── */
+.milestone-item {
+  background: var(--surf2);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-bottom: 10px;
+  border-left: 3px solid var(--surf3);
+  transition: border-color .2s;
+}
+.milestone-item.active-ms { border-left-color: var(--gold); }
+.milestone-item.done-ms   { border-left-color: var(--green); }
+.ms-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.ms-period { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.ms-target { font-size: 16px; font-weight: 600; color: var(--gold-lt); }
+.ms-desc   { font-size: 12px; color: var(--muted2); margin-top: 4px; }
+.ms-progress { margin-top: 10px; }
+.ms-bar-wrap { background: var(--surf3); border-radius: 2px; height: 4px; overflow: hidden; }
+.ms-bar-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width .5s ease; }
+
+/* ── SETTINGS PAGE ── */
+.settings-item {
+  padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.settings-item:last-child { border-bottom: none; }
+.settings-item .s-label { font-size: 13px; color: var(--white); }
+.settings-item .s-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.settings-item .s-val   { font-size: 12px; color: var(--gold); font-family: var(--ff-mono); }
+
+/* ── TOGGLE ── */
+.toggle {
+  width: 44px; height: 24px;
+  background: var(--surf3);
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: background .2s;
+  border: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+.toggle.on { background: var(--gold); }
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 18px; height: 18px;
+  background: var(--white);
+  border-radius: 50%;
+  transition: transform .2s;
+}
+.toggle.on::after { transform: translateX(20px); }
+
+/* ── INSTALL BANNER ── */
+#installBanner {
+  display: none;
+  position: fixed;
+  bottom: 80px; left: 12px; right: 12px;
+  z-index: 150;
+  background: var(--surf2);
+  border: 1px solid var(--gold-line);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+#installBanner .ib-title { font-size: 13px; font-weight: 600; color: var(--white); }
+#installBanner .ib-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+#installBanner .ib-btns  { display: flex; gap: 10px; margin-top: 12px; }
+.ib-install {
+  flex: 1;
+  padding: 10px;
+  background: var(--gold);
+  color: #111;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ib-dismiss {
+  padding: 10px 14px;
+  background: var(--surf3);
+  color: var(--muted2);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* ── DATE TABS ── */
+.date-header {
+  padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.date-today {
+  font-family: var(--ff-display);
+  font-size: 16px;
+  color: var(--white);
+}
+.date-today span { color: var(--gold); }
+.date-nav {
+  display: flex; gap: 8px;
+}
+.date-nav-btn {
+  background: var(--surf2);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: var(--muted2);
+  font-size: 12px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.date-nav-btn.current { color: var(--gold); border-color: var(--gold-line); background: var(--gold-dim); }
+
+/* ── CONFIRMATION MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(0,0,0,0.7);
+  align-items: flex-end; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal-sheet {
+  background: var(--surf);
+  border-radius: 20px 20px 0 0;
+  padding: 24px 20px;
+  padding-bottom: calc(24px + var(--safe-bot));
+  width: 100%;
+  border-top: 1px solid var(--gold-line);
+  animation: slideUp .3s ease;
+}
+@keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.modal-sheet h3 { font-family: var(--ff-display); color: var(--gold); font-size: 18px; margin-bottom: 8px; }
+.modal-sheet p  { font-size: 13px; color: var(--muted2); line-height: 1.6; margin-bottom: 20px; }
+.modal-btns { display: flex; gap: 10px; }
+.modal-confirm {
+  flex: 1; padding: 13px;
+  background: var(--red); color: var(--white);
+  border: none; border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.modal-cancel {
+  flex: 1; padding: 13px;
+  background: var(--surf3); color: var(--muted2);
+  border: none; border-radius: var(--radius-sm);
+  font-size: 14px; cursor: pointer;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-logo">Trading Journal</div>
+  <div class="splash-sub">XAUUSD · Professional</div>
+  <div class="splash-bar"><div class="splash-fill"></div></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- INSTALL BANNER -->
+<div id="installBanner">
+  <div class="ib-title">Install sebagai Aplikasi</div>
+  <div class="ib-sub">Tambahkan ke homescreen untuk akses cepat & offline</div>
+  <div class="ib-btns">
+    <button class="ib-install" onclick="installApp()">Install Sekarang</button>
+    <button class="ib-dismiss" onclick="dismissInstall()">Nanti</button>
+  </div>
+</div>
+
+<!-- ══ PAGE: DAILY JOURNAL ══ -->
+<div class="page active" id="page-journal">
+  <div class="page-header">
+    <h1>Daily Journal</h1>
+    <p>XAUUSD · Log Harian</p>
+  </div>
+
+  <!-- Date -->
+  <div class="date-header">
+    <div class="date-today">
+      <span id="displayDay">Senin</span>, <span id="displayDate">1 Jan 2025</span>
+    </div>
+    <div class="date-nav">
+      <button class="date-nav-btn" onclick="changeDate(-1)">◀</button>
+      <button class="date-nav-btn current" onclick="goToday()">Hari Ini</button>
+      <button class="date-nav-btn" onclick="changeDate(1)">▶</button>
+    </div>
+  </div>
+
+  <!-- Desire Statement -->
+  <div class="desire-card">
+    <div class="desire-text">
+      "Pada Desember 2026, saya dengan mudah dan konsisten memperoleh minimal Rp 300.000.000 per bulan dari trading XAUUSD. Saya trading dengan disiplin tinggi, manajemen risiko ketat, dan psikologi yang kuat."
+    </div>
+    <div class="desire-check">
+      <div class="check-box" id="desireCheck" onclick="toggleDesire()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="display:none" id="desireCheckIcon"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <span class="check-label">Sudah dibaca pagi ini</span>
+    </div>
+  </div>
+
+  <!-- Section 1: Setup -->
+  <div class="section">
+    <div class="section-head"><div class="section-accent"></div><h2>1. Setup Trading</h2></div>
+    <div class="section-body">
+      <div class="field-row">
+        <div class="field">
+          <label>Daily Bias</label>
+          <select id="bias">
+            <option value="Bullish">📈 Bullish</option>
+            <option value="Bearish">📉 Bearish</option>
+            <option value="Sideways">↔️ Sideways</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Session</label>
+          <select id="session">
+            <option>Asia</option>
+            <option>London</option>
+            <option selected>New York</option>
+            <option>LN+NY Overlap</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Support</label>
+          <input type="number" id="support" placeholder="3280.00" step="0.01" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label>Resistance</label>
+          <input type="number" id="resist" placeholder="3340.00" step="0.01" inputmode="decimal">
+        </div>
+      </div>
+      <div class="field">
+        <label>Strategi</label>
+        <select id="strat">
+          <option>Break & Retest</option>
+          <option>Supply–Demand</option>
+          <option>ICT / SMC</option>
+          <option>News Trade</option>
+          <option>Scalping</option>
+          <option>Swing</option>
+          <option>Lainnya</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Trade Log -->
+  <div class="section">
+    <div class="section-head"><div class="section-accent"></div><h2>2. Trade Log</h2></div>
+    <div class="section-body">
+      <div class="trade-list" id="tradeList"></div>
+      <button class="add-trade-btn" onclick="addTrade()">+ Tambah Trade</button>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-row" id="summaryRow">
+    <div class="sum-card"><div class="sum-val" id="sumTotal">0</div><div class="sum-lbl">Total Trade</div></div>
+    <div class="sum-card"><div class="sum-val" id="sumWR">0%</div><div class="sum-lbl">Win Rate</div></div>
+    <div class="sum-card"><div class="sum-val" id="sumPL">$0</div><div class="sum-lbl">Net P/L</div></div>
+    <div class="sum-card"><div class="sum-val" style="font-size:16px;color:var(--amber)">1%</div><div class="sum-lbl">Max Risk</div></div>
+  </div>
+
+  <!-- Section 3: Psychology -->
+  <div class="section">
+    <div class="section-head"><div class="section-accent"></div><h2>3. Psychology</h2></div>
+    <div class="section-body">
+      <div class="field">
+        <label>Mood Saat Trading</label>
+        <div class="mood-chips">
+          <div class="chip" onclick="setMood(this,'Tenang')">Tenang</div>
+          <div class="chip" onclick="setMood(this,'Fokus')">Fokus</div>
+          <div class="chip" onclick="setMood(this,'Ragu')">Ragu</div>
+          <div class="chip" onclick="setMood(this,'Emosional')">Emosional</div>
+          <div class="chip" onclick="setMood(this,'Greed')">Greed</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Yang saya lakukan baik hari ini</label>
+        <textarea id="baik" placeholder="1. &#10;2. "></textarea>
+      </div>
+      <div class="field">
+        <label>Yang harus diperbaiki besok</label>
+        <textarea id="perbaiki" placeholder="Evaluasi..."></textarea>
+      </div>
+      <div style="margin-top:4px">
+        <div class="slider-row">
+          <span class="slider-label">Kesabaran</span>
+          <div class="slider-wrap"><input type="range" min="1" max="10" value="7" id="sl1" oninput="document.getElementById('sv1').textContent=this.value"></div>
+          <span class="slider-val" id="sv1">7</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">Disiplin</span>
+          <div class="slider-wrap"><input type="range" min="1" max="10" value="7" id="sl2" oninput="document.getElementById('sv2').textContent=this.value"></div>
+          <span class="slider-val" id="sv2">7</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">Fokus</span>
+          <div class="slider-wrap"><input type="range" min="1" max="10" value="7" id="sl3" oninput="document.getElementById('sv3').textContent=this.value"></div>
+          <span class="slider-val" id="sv3">7</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Affirmation -->
+  <div class="affirmation">
+    <small>Affirmasi Harian</small>
+    <p>"Saya trader yang tenang, disiplin, dan profitable."</p>
+  </div>
+
+  <!-- Section 4: EOD -->
+  <div class="section" style="margin-top:16px">
+    <div class="section-head"><div class="section-accent"></div><h2>4. End of Day Review</h2></div>
+    <div class="section-body">
+      <div class="field-row">
+        <div class="field">
+          <label>Equity Sekarang</label>
+          <input type="text" id="equity" placeholder="Rp 0">
+        </div>
+        <div class="field">
+          <label>Besok Fokus Pada</label>
+          <input type="text" id="besok" placeholder="...">
+        </div>
+      </div>
+      <div class="field">
+        <label>Pelajaran Terbesar Hari Ini</label>
+        <input type="text" id="pelajaran" placeholder="Insight terbaik hari ini...">
+      </div>
+      <div class="field">
+        <label>Gratitude — Saya bersyukur karena...</label>
+        <textarea id="gratitude" placeholder="..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <button class="save-btn" onclick="saveJournal()">💾 Simpan Jurnal Hari Ini</button>
+  <div style="height:16px"></div>
+</div>
+
+<!-- ══ PAGE: HISTORY ══ -->
+<div class="page" id="page-history">
+  <div class="page-header">
+    <h1>Riwayat</h1>
+    <p>Log semua sesi trading</p>
+  </div>
+  <div style="height:12px"></div>
+  <div id="historyList"></div>
+</div>
+
+<!-- ══ PAGE: GOAL ══ -->
+<div class="page" id="page-goal">
+  <div class="page-header">
+    <h1>Goal Plan</h1>
+    <p>Brian Tracy Method</p>
+  </div>
+
+  <div class="desire-card" style="margin-top:16px">
+    <div class="desire-text">"Pada Desember 2026, saya dengan mudah dan konsisten memperoleh minimal Rp 300.000.000 per bulan dari trading XAUUSD. Saya trading dengan disiplin tinggi, manajemen risiko ketat, dan psikologi yang kuat. Uang mengalir deras ke rekening saya. Saya merasa sangat bersyukur, percaya diri, bebas finansial, dan bahagia sekarang."</div>
+  </div>
+
+  <div class="section" style="margin-top:16px">
+    <div class="section-head"><div class="section-accent"></div><h2>Milestone Bertahap</h2></div>
+    <div class="section-body" style="padding:14px">
+      <div class="milestone-item active-ms">
+        <div class="ms-head">
+          <span class="ms-period">Akhir 2025</span>
+          <select onchange="saveMilestone(0,this.value)" id="ms0" style="background:var(--surf3);border:1px solid var(--gold-line);color:var(--gold);font-size:11px;padding:3px 8px;border-radius:4px;-webkit-appearance:none;"><option>Dalam Proses</option><option>Belum Mulai</option><option>50% Tercapai</option><option>75% Tercapai</option><option>✅ Tercapai</option></select>
+        </div>
+        <div class="ms-target">Rp 30 – 50 Juta/bulan</div>
+        <div class="ms-desc">Bangun konsistensi & psychology trading</div>
+        <div class="ms-progress"><div class="ms-bar-wrap"><div class="ms-bar-fill" id="msbar0" style="width:30%"></div></div></div>
+      </div>
+      <div class="milestone-item">
+        <div class="ms-head">
+          <span class="ms-period">Akhir 2026</span>
+          <select onchange="saveMilestone(1,this.value)" id="ms1" style="background:var(--surf3);border:1px solid rgba(255,255,255,0.1);color:var(--muted2);font-size:11px;padding:3px 8px;border-radius:4px;-webkit-appearance:none;"><option>Belum Mulai</option><option>Dalam Proses</option><option>50% Tercapai</option><option>75% Tercapai</option><option>✅ Tercapai</option></select>
+        </div>
+        <div class="ms-target">Rp 100 – 150 Juta/bulan</div>
+        <div class="ms-desc">Scale position + refine strategy</div>
+        <div class="ms-progress"><div class="ms-bar-wrap"><div class="ms-bar-fill" id="msbar1" style="width:0%"></div></div></div>
+      </div>
+      <div class="milestone-item" style="margin-bottom:0">
+        <div class="ms-head">
+          <span class="ms-period">Desember 2027</span>
+          <select onchange="saveMilestone(2,this.value)" id="ms2" style="background:var(--surf3);border:1px solid rgba(255,255,255,0.1);color:var(--muted2);font-size:11px;padding:3px 8px;border-radius:4px;-webkit-appearance:none;"><option>Belum Mulai</option><option>Dalam Proses</option><option>50% Tercapai</option><option>75% Tercapai</option><option>✅ Tercapai</option></select>
+        </div>
+        <div class="ms-target">Rp 300 Juta+/bulan</div>
+        <div class="ms-desc">Full consistency & lifestyle freedom — Major Definite Purpose</div>
+        <div class="ms-progress"><div class="ms-bar-wrap"><div class="ms-bar-fill" id="msbar2" style="width:0%"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" style="margin-top:16px">
+    <div class="section-head"><div class="section-accent"></div><h2>Daily Trading Rules</h2></div>
+    <div class="section-body" style="padding:0">
+      <div class="settings-item"><div><div class="s-label">Risk per Trade</div><div class="s-sub">Maksimal 1% dari equity</div></div><div class="s-val">1%</div></div>
+      <div class="settings-item"><div><div class="s-label">Minimal RR</div><div class="s-sub">Reward minimal 2× Risk</div></div><div class="s-val">1:2</div></div>
+      <div class="settings-item"><div><div class="s-label">Maks Trade/Hari</div><div class="s-sub">Stop jika sudah 5 trade</div></div><div class="s-val">5</div></div>
+      <div class="settings-item"><div><div class="s-label">Stop Loss 3×</div><div class="s-sub">Stop trading jika loss 3 berturut</div></div><div class="s-val" style="color:var(--red)">STOP</div></div>
+      <div class="settings-item" style="border:none"><div><div class="s-label">No Revenge Trade</div><div class="s-sub">Dilarang menambah lot setelah loss</div></div><div class="s-val" style="color:var(--red)">❌</div></div>
+    </div>
+  </div>
+
+  <div class="affirmation" style="margin-top:16px">
+    <small>Psychology Daily Routine (10–15 menit)</small>
+    <p>Baca Desire Statement → Visualisasi sukses → "Saya mengendalikan emosi, saya mengendalikan hasil."</p>
+  </div>
+  <div style="height:16px"></div>
+</div>
+
+<!-- ══ PAGE: SETTINGS ══ -->
+<div class="page" id="page-settings">
+  <div class="page-header">
+    <h1>Pengaturan</h1>
+    <p>Konfigurasi jurnal</p>
+  </div>
+
+  <div class="section" style="margin-top:16px">
+    <div class="section-head"><div class="section-accent"></div><h2>Akun</h2></div>
+    <div class="section-body">
+      <div class="field">
+        <label>Nama Trader</label>
+        <input type="text" id="traderName" placeholder="Nama kamu...">
+      </div>
+      <div class="field">
+        <label>Equity Awal (Rp)</label>
+        <input type="number" id="initialEquity" placeholder="1000000" inputmode="numeric">
+      </div>
+    </div>
+  </div>
+
+  <div class="section" style="margin-top:16px">
+    <div class="section-head"><div class="section-accent"></div><h2>Notifikasi</h2></div>
+    <div class="section-body" style="padding:0">
+      <div class="settings-item">
+        <div><div class="s-label">Reminder Pagi</div><div class="s-sub">Baca Desire Statement</div></div>
+        <div class="toggle" id="togglePagi" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="settings-item" style="border:none">
+        <div><div class="s-label">Review Malam</div><div class="s-sub">End of Day Review</div></div>
+        <div class="toggle on" id="toggleMalam" onclick="this.classList.toggle('on')"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" style="margin-top:16px">
+    <div class="section-head"><div class="section-accent"></div><h2>Data</h2></div>
+    <div class="section-body" style="padding:0">
+      <div class="settings-item">
+        <div><div class="s-label">Total Jurnal Tersimpan</div></div>
+        <div class="s-val" id="totalSaved">0 hari</div>
+      </div>
+      <div class="settings-item">
+        <div><div class="s-label">Versi Aplikasi</div></div>
+        <div class="s-val">1.0.0</div>
+      </div>
+      <div class="settings-item" style="border:none">
+        <div><div class="s-label" style="color:var(--red)">Hapus Semua Data</div><div class="s-sub">Tidak dapat dibatalkan</div></div>
+        <button onclick="confirmClearAll()" style="background:var(--red-bg);border:1px solid var(--red);color:var(--red);padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;">Hapus</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:20px 16px;text-align:center">
+    <div style="font-family:var(--ff-display);font-size:18px;color:var(--gold);margin-bottom:6px">Trading Journal</div>
+    <div style="font-size:11px;color:var(--muted)">XAUUSD · Professional · Brian Tracy Method</div>
+    <div style="font-size:10px;color:var(--muted);margin-top:8px;opacity:.6">Data tersimpan lokal di device kamu</div>
+  </div>
+</div>
+
+<!-- ══ BOTTOM NAV ══ -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="goPage('journal',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    <span>Journal</span>
+  </button>
+  <button class="nav-btn" onclick="goPage('history',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    <span>Riwayat</span>
+  </button>
+  <button class="nav-btn" onclick="goPage('goal',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+    <span>Goal</span>
+  </button>
+  <button class="nav-btn" onclick="goPage('settings',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span>Settings</span>
+  </button>
+</nav>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="clearModal">
+  <div class="modal-sheet">
+    <h3>Hapus Semua Data?</h3>
+    <p>Semua jurnal trading yang tersimpan akan dihapus permanen dan tidak dapat dipulihkan.</p>
+    <div class="modal-btns">
+      <button class="modal-confirm" onclick="clearAllData()">Hapus Permanen</button>
+      <button class="modal-cancel" onclick="closeClearModal()">Batal</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────
+const DAYS = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+const MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+let currentDate = new Date();
+let trades = [];
+let selectedMood = '';
+let deferredPrompt = null;
+
+function dateKey(d) {
+  return d.toISOString().split('T')[0];
+}
+
+// ── NAVIGATION ──────────────────────────────────────────
+function goPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (id === 'history') renderHistory();
+  if (id === 'settings') updateSettingsStats();
+}
+
+// ── DATE NAVIGATION ──────────────────────────────────────
+function updateDateDisplay() {
+  document.getElementById('displayDay').textContent  = DAYS[currentDate.getDay()];
+  document.getElementById('displayDate').textContent =
+    `${currentDate.getDate()} ${MONTHS[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+  loadJournal();
+}
+
+function changeDate(d) {
+  const nd = new Date(currentDate);
+  nd.setDate(nd.getDate() + d);
+  currentDate = nd;
+  updateDateDisplay();
+}
+
+function goToday() {
+  currentDate = new Date();
+  updateDateDisplay();
+}
+
+// ── TRADES ──────────────────────────────────────────────
+let tradeCount = 0;
+
+function addTrade() {
+  tradeCount++;
+  const id = 'trade_' + tradeCount;
+  trades.push({ id, time:'', dir:'', entry:'', sl:'', tp:'', lot:'', risk:'', pl:'', wl:'', reason:'' });
+  renderTrades();
+}
+
+function removeTrade(id) {
+  trades = trades.filter(t => t.id !== id);
+  renderTrades();
+  calcSummary();
+}
+
+function renderTrades() {
+  const list = document.getElementById('tradeList');
+  list.innerHTML = '';
+  trades.forEach((t, i) => {
+    const dirClass = t.dir === 'Buy' ? 'dir-buy' : t.dir === 'Sell' ? 'dir-sell' : 'dir-none';
+    const wlClass  = t.wl === 'Win' ? 'wl-win' : t.wl === 'Loss' ? 'wl-loss' : '';
+    list.innerHTML += `
+      <div class="trade-card" id="card_${t.id}">
+        <div class="trade-card-head">
+          <span class="trade-num">#${i+1}</span>
+          <span class="direction-badge ${dirClass}">${t.dir || '—'}</span>
+          <span class="trade-time">${t.time || '--:--'}</span>
+          <button class="del-trade" onclick="removeTrade('${t.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+          </button>
+        </div>
+        <div class="trade-card-body">
+          <div class="trade-grid">
+            <div class="trade-field-mini">
+              <label>Waktu</label>
+              <input type="time" value="${t.time}" onchange="updateTrade('${t.id}','time',this.value)">
+            </div>
+            <div class="trade-field-mini">
+              <label>Arah</label>
+              <select onchange="updateTrade('${t.id}','dir',this.value)" style="color:${t.dir==='Buy'?'#4CAF6F':t.dir==='Sell'?'#E05555':'#999'}">
+                <option value="" ${!t.dir?'selected':''}>—</option>
+                <option value="Buy" ${t.dir==='Buy'?'selected':''} style="color:#4CAF6F">Buy</option>
+                <option value="Sell" ${t.dir==='Sell'?'selected':''} style="color:#E05555">Sell</option>
+              </select>
+            </div>
+            <div class="trade-field-mini">
+              <label>Entry</label>
+              <input type="number" value="${t.entry}" placeholder="0.00" step="0.01" inputmode="decimal" onchange="updateTrade('${t.id}','entry',this.value)">
+            </div>
+            <div class="trade-field-mini">
+              <label>SL</label>
+              <input type="number" value="${t.sl}" placeholder="0.00" step="0.01" inputmode="decimal" onchange="updateTrade('${t.id}','sl',this.value)">
+            </div>
+            <div class="trade-field-mini">
+              <label>TP</label>
+              <input type="number" value="${t.tp}" placeholder="0.00" step="0.01" inputmode="decimal" onchange="updateTrade('${t.id}','tp',this.value)">
+            </div>
+            <div class="trade-field-mini">
+              <label>Lot</label>
+              <input type="number" value="${t.lot}" placeholder="0.01" step="0.01" inputmode="decimal" onchange="updateTrade('${t.id}','lot',this.value)">
+            </div>
+            <div class="trade-field-mini">
+              <label>Risk ($)</label>
+              <input type="number" value="${t.risk}" placeholder="0" inputmode="decimal" onchange="updateTrade('${t.id}','risk',this.value)">
+            </div>
+            <div class="trade-field-mini">
+              <label>P/L ($)</label>
+              <input type="number" value="${t.pl}" placeholder="0" inputmode="decimal" onchange="updateTrade('${t.id}','pl',this.value); calcSummary()">
+            </div>
+            <div class="trade-field-mini">
+              <label>Win/Loss</label>
+              <select class="${wlClass}" onchange="updateTrade('${t.id}','wl',this.value); this.className=this.value==='Win'?'wl-win':this.value==='Loss'?'wl-loss':''; calcSummary()">
+                <option value="" ${!t.wl?'selected':''}>—</option>
+                <option value="Win" ${t.wl==='Win'?'selected':''}>Win</option>
+                <option value="Loss" ${t.wl==='Loss'?'selected':''}>Loss</option>
+                <option value="BE" ${t.wl==='BE'?'selected':''}>BE</option>
+              </select>
+            </div>
+          </div>
+          <div class="trade-notes">
+            <label>Alasan Entry / Catatan</label>
+            <input type="text" value="${t.reason}" placeholder="Setup, konfirmasi..." onchange="updateTrade('${t.id}','reason',this.value)">
+          </div>
+        </div>
+      </div>`;
+  });
+  calcSummary();
+}
+
+function updateTrade(id, field, val) {
+  const t = trades.find(x => x.id === id);
+  if (t) {
+    t[field] = val;
+    if (field === 'dir') {
+      const badge = document.querySelector(`#card_${id} .direction-badge`);
+      if (badge) {
+        badge.textContent = val || '—';
+        badge.className = 'direction-badge ' + (val==='Buy'?'dir-buy':val==='Sell'?'dir-sell':'dir-none');
+      }
+    }
+    if (field === 'time') {
+      const timeEl = document.querySelector(`#card_${id} .trade-time`);
+      if (timeEl) timeEl.textContent = val || '--:--';
+    }
+  }
+}
+
+function calcSummary() {
+  const total = trades.length;
+  const wins  = trades.filter(t => t.wl === 'Win').length;
+  const loss  = trades.filter(t => t.wl === 'Loss').length;
+  const pl    = trades.reduce((s,t) => s + (parseFloat(t.pl)||0), 0);
+  const wr    = total > 0 ? Math.round((wins/total)*100) : 0;
+
+  document.getElementById('sumTotal').textContent = total;
+  document.getElementById('sumWR').textContent    = wr + '%';
+
+  const plEl = document.getElementById('sumPL');
+  plEl.textContent  = (pl >= 0 ? '+' : '') + '$' + pl.toFixed(0);
+  plEl.className    = 'sum-val ' + (pl > 0 ? 'green' : pl < 0 ? 'red' : '');
+}
+
+// ── MOOD ────────────────────────────────────────────────
+function setMood(chip, val) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  selectedMood = val;
+}
+
+// ── DESIRE CHECK ────────────────────────────────────────
+function toggleDesire() {
+  const box = document.getElementById('desireCheck');
+  const ico = document.getElementById('desireCheckIcon');
+  const checked = box.classList.toggle('checked');
+  ico.style.display = checked ? 'block' : 'none';
+}
+
+// ── SAVE / LOAD ──────────────────────────────────────────
+function saveJournal() {
+  const key = 'journal_' + dateKey(currentDate);
+  const data = {
+    date:      dateKey(currentDate),
+    desire:    document.getElementById('desireCheck').classList.contains('checked'),
+    bias:      document.getElementById('bias').value,
+    session:   document.getElementById('session').value,
+    support:   document.getElementById('support').value,
+    resist:    document.getElementById('resist').value,
+    strat:     document.getElementById('strat').value,
+    trades:    trades,
+    mood:      selectedMood,
+    baik:      document.getElementById('baik').value,
+    perbaiki:  document.getElementById('perbaiki').value,
+    sl1:       document.getElementById('sl1').value,
+    sl2:       document.getElementById('sl2').value,
+    sl3:       document.getElementById('sl3').value,
+    equity:    document.getElementById('equity').value,
+    besok:     document.getElementById('besok').value,
+    pelajaran: document.getElementById('pelajaran').value,
+    gratitude: document.getElementById('gratitude').value,
+    savedAt:   new Date().toISOString(),
+  };
+  localStorage.setItem(key, JSON.stringify(data));
+  showToast('✅ Jurnal tersimpan!');
+}
+
+function loadJournal() {
+  const key = 'journal_' + dateKey(currentDate);
+  const raw = localStorage.getItem(key);
+  clearJournalForm();
+
+  if (raw) {
+    const d = JSON.parse(raw);
+    document.getElementById('bias').value     = d.bias    || 'Bullish';
+    document.getElementById('session').value  = d.session || 'New York';
+    document.getElementById('support').value  = d.support || '';
+    document.getElementById('resist').value   = d.resist  || '';
+    document.getElementById('strat').value    = d.strat   || 'Break & Retest';
+    document.getElementById('baik').value     = d.baik    || '';
+    document.getElementById('perbaiki').value = d.perbaiki|| '';
+    document.getElementById('equity').value   = d.equity  || '';
+    document.getElementById('besok').value    = d.besok   || '';
+    document.getElementById('pelajaran').value= d.pelajaran||'';
+    document.getElementById('gratitude').value= d.gratitude||'';
+
+    const sl1 = document.getElementById('sl1');
+    const sl2 = document.getElementById('sl2');
+    const sl3 = document.getElementById('sl3');
+    sl1.value = d.sl1 || 7;
+    sl2.value = d.sl2 || 7;
+    sl3.value = d.sl3 || 7;
+    document.getElementById('sv1').textContent = sl1.value;
+    document.getElementById('sv2').textContent = sl2.value;
+    document.getElementById('sv3').textContent = sl3.value;
+
+    if (d.desire) {
+      document.getElementById('desireCheck').classList.add('checked');
+      document.getElementById('desireCheckIcon').style.display = 'block';
+    }
+
+    if (d.mood) {
+      selectedMood = d.mood;
+      document.querySelectorAll('.chip').forEach(c => {
+        if (c.textContent.trim() === d.mood) c.classList.add('active');
+      });
+    }
+
+    trades = d.trades || [];
+    tradeCount = trades.length;
+    renderTrades();
+  }
+}
+
+function clearJournalForm() {
+  ['support','resist','baik','perbaiki','equity','besok','pelajaran','gratitude']
+    .forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('bias').value    = 'Bullish';
+  document.getElementById('session').value = 'New York';
+  document.getElementById('strat').value   = 'Break & Retest';
+  ['sl1','sl2','sl3'].forEach(id => { document.getElementById(id).value = 7; });
+  ['sv1','sv2','sv3'].forEach(id => { document.getElementById(id).textContent = 7; });
+  document.getElementById('desireCheck').classList.remove('checked');
+  document.getElementById('desireCheckIcon').style.display = 'none';
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  selectedMood = '';
+  trades = [];
+  tradeCount = 0;
+  renderTrades();
+}
+
+// ── HISTORY ─────────────────────────────────────────────
+function renderHistory() {
+  const container = document.getElementById('historyList');
+  const keys = Object.keys(localStorage)
+    .filter(k => k.startsWith('journal_'))
+    .sort().reverse();
+
+  if (!keys.length) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">📓</div><p>Belum ada jurnal yang tersimpan.<br>Mulai isi journal harian kamu!</p></div>`;
+    return;
+  }
+
+  container.innerHTML = keys.map(key => {
+    const d = JSON.parse(localStorage.getItem(key));
+    const dt  = new Date(d.date + 'T12:00:00');
+    const day = DAYS[dt.getDay()];
+    const mn  = `${dt.getDate()} ${MONTHS[dt.getMonth()]} ${dt.getFullYear()}`;
+    const pl  = (d.trades||[]).reduce((s,t) => s + (parseFloat(t.pl)||0), 0);
+    const tot = (d.trades||[]).length;
+    const wins= (d.trades||[]).filter(t=>t.wl==='Win').length;
+    const wr  = tot > 0 ? Math.round(wins/tot*100) : 0;
+    const plClass = pl > 0 ? 'pos' : pl < 0 ? 'neg' : '';
+    const plStr = (pl >= 0 ? '+' : '') + '$' + pl.toFixed(0);
+    return `<div class="history-item" onclick="loadFromHistory('${d.date}')">
+      <div class="history-date"><div class="d">${day}, ${mn}</div><div class="m">${d.bias||''} · ${d.strat||''} · ${tot} trade</div></div>
+      <div class="history-stats"><div class="pl ${plClass}">${plStr}</div><div class="wr">WR ${wr}%</div></div>
+      <button class="history-del" onclick="event.stopPropagation(); deleteJournal('${key}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function loadFromHistory(dateStr) {
+  currentDate = new Date(dateStr + 'T12:00:00');
+  updateDateDisplay();
+  goPage('journal', document.querySelector('.nav-btn'));
+  document.querySelectorAll('.nav-btn')[0].classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach((b,i) => { if(i!==0) b.classList.remove('active'); });
+}
+
+function deleteJournal(key) {
+  localStorage.removeItem(key);
+  renderHistory();
+  showToast('🗑️ Jurnal dihapus');
+}
+
+// ── MILESTONES ───────────────────────────────────────────
+function saveMilestone(idx, val) {
+  localStorage.setItem('milestone_' + idx, val);
+  const pcts = {'Belum Mulai':0,'Dalam Proses':30,'50% Tercapai':50,'75% Tercapai':75,'✅ Tercapai':100};
+  document.getElementById('msbar'+idx).style.width = (pcts[val]||0) + '%';
+}
+
+function loadMilestones() {
+  [0,1,2].forEach(i => {
+    const val = localStorage.getItem('milestone_' + i);
+    if (val) {
+      document.getElementById('ms'+i).value = val;
+      const pcts = {'Belum Mulai':0,'Dalam Proses':30,'50% Tercapai':50,'75% Tercapai':75,'✅ Tercapai':100};
+      document.getElementById('msbar'+i).style.width = (pcts[val]||0) + '%';
+    }
+  });
+}
+
+// ── SETTINGS ────────────────────────────────────────────
+function updateSettingsStats() {
+  const cnt = Object.keys(localStorage).filter(k => k.startsWith('journal_')).length;
+  document.getElementById('totalSaved').textContent = cnt + ' hari';
+}
+
+function confirmClearAll() {
+  document.getElementById('clearModal').classList.add('show');
+}
+function closeClearModal() {
+  document.getElementById('clearModal').classList.remove('show');
+}
+function clearAllData() {
+  Object.keys(localStorage).filter(k => k.startsWith('journal_') || k.startsWith('milestone_'))
+    .forEach(k => localStorage.removeItem(k));
+  closeClearModal();
+  clearJournalForm();
+  showToast('🗑️ Semua data dihapus');
+  updateSettingsStats();
+}
+
+// ── TOAST ────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── PWA INSTALL ──────────────────────────────────────────
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (!localStorage.getItem('installDismissed')) {
+    setTimeout(() => {
+      document.getElementById('installBanner').style.display = 'block';
+    }, 2000);
+  }
+});
+
+function installApp() {
+  document.getElementById('installBanner').style.display = 'none';
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(r => {
+      if (r.outcome === 'accepted') showToast('🎉 App berhasil diinstall!');
+      deferredPrompt = null;
+    });
+  }
+}
+function dismissInstall() {
+  document.getElementById('installBanner').style.display = 'none';
+  localStorage.setItem('installDismissed', '1');
+}
+
+// ── SERVICE WORKER ───────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+// ── INIT ─────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('hide');
+  }, 1200);
+
+  updateDateDisplay();
+  loadMilestones();
+
+  const name = localStorage.getItem('traderName');
+  if (name) document.getElementById('traderName').value = name;
+  const eq = localStorage.getItem('initialEquity');
+  if (eq) document.getElementById('initialEquity').value = eq;
+
+  document.getElementById('traderName').addEventListener('change', e => {
+    localStorage.setItem('traderName', e.target.value);
+  });
+  document.getElementById('initialEquity').addEventListener('change', e => {
+    localStorage.setItem('initialEquity', e.target.value);
+  });
+});
+</script>
+</body>
+</html>
